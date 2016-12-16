@@ -23,7 +23,7 @@ def piecewise(files, destroot):
         d = dest(f, destroot)
         ensure_mkdir(d)
         print(f, '->', d)
-        Popen(['rsync', '-am', f, d]).wait()
+        Popen(['rsync', '-am', '--delete', f, d]).wait()
 
 
 def link(files, destroot):
@@ -58,6 +58,15 @@ def main(args):
         for s, f in sorted(pairs, key=lambda x: x[0]):
             print(s, f)
         print("Total:", total, "Bytes")
+
+    elif args.task == 'covered':
+        if not args.dest:
+            print("No file given to check.")
+        d = os.path.abspath(args.dest)
+        if d in files:
+            print(d, "is covered by", args.file)
+        else:
+            print(d, "is NOT covered by", args.file)
 
     # Dangerous functions.
     elif args.task in ['sync', 'link', 'ball']:

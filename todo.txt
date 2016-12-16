@@ -5,3 +5,4 @@
 - Autonaming feature for tarballs based on datetime.
 - Better functions for backing up huge directories like photos.
     - Pick and choose which ones to sync?
+- Function to check if a certain file is covered by a backup.
