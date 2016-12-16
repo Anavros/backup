@@ -7,15 +7,11 @@ import os
 from subprocess import Popen
 
 import load
-
-
-HOME = os.path.expanduser('~/')
-SYNCROOT = os.path.join(HOME, 'backup', 'sync')
-LINKROOT = os.path.join(HOME, 'backup', 'link')
+from constants import HOME
 
 
 def dest(source, destroot):
-    return os.path.join(destroot, source.lstrip(HOME))
+    return os.path.join(destroot, source.replace(HOME, ''))
 
 
 def ensure_mkdir(dest):
@@ -26,35 +22,47 @@ def piecewise(files, destroot):
     for f in files:
         d = dest(f, destroot)
         ensure_mkdir(d)
-        Popen(['rsync', '-avm', f, d]).wait()
+        print(f, '->', d)
+        Popen(['rsync', '-am', f, d]).wait()
 
 
 def link(files, destroot):
     for f in files:
         d = dest(f, destroot)
         ensure_mkdir(d)
+        print(f, '<=>', d)
         Popen(['cp', '-al', f, d]).wait()
+
+
+def tarball(files, d):
+    print("Tarring files into {}...".format(d))
+    Popen(['tar', 'czf', d] + files).wait()
 
 
 def main(args):
     d = os.path.abspath(args.dest)
+    files = load.filelist(args.file)
+
+    # Safe functions.
     if args.task == 'list':
-        files = load.filelist(args.file)
         for f in files:
             print(f)
             #print("-> ", dest(f, d))
+
+    # Dangerous functions.
+    if args.task in ['sync', 'link', 'ball'] and not args.safety_off:
+        print("Safety on! Call again with --safety-off.")
+        return
+
     elif args.task == 'sync':
-        if not args.safety_off:
-            print("Safety on! Call again with --safety-off.")
-            return
-        files = load.filelist(args.file)
         piecewise(files, d)
+
     elif args.task == 'link':
-        if not args.safety_off:
-            print("Safety on! Call again with --safety-off.")
-            return
-        files = load.filelist(args.file)
         link(files, d)
+
+    elif args.task == 'ball':
+        tarball(files, args.dest)
+
     else:
         print("Unknown task:", args.task)
 

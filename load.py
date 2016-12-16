@@ -6,6 +6,8 @@ Functions to read backup config files.
 import os
 import pathspec
 
+from constants import HOME
+
 
 def filelist(path):
     """
@@ -13,7 +15,7 @@ def filelist(path):
     Assumes all paths are prefixed with the user's home directory.
     """
     roots = {}
-    under = '/'
+    under = HOME
     globs = []
     with open(path, 'r') as f:
         for line in f:
