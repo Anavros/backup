@@ -7,36 +7,8 @@ import os
 from subprocess import Popen
 
 import load
+import util
 from constants import HOME
-
-
-def dest(source, destroot):
-    return os.path.join(destroot, source.replace(HOME, ''))
-
-
-def ensure_mkdir(dest):
-    Popen(['mkdir', '-p', os.path.dirname(dest)]).wait()
-
-
-def piecewise(files, destroot):
-    for f in files:
-        d = dest(f, destroot)
-        ensure_mkdir(d)
-        print(f, '->', d)
-        Popen(['rsync', '-am', '--delete', f, d]).wait()
-
-
-def link(files, destroot):
-    for f in files:
-        d = dest(f, destroot)
-        ensure_mkdir(d)
-        print(f, '<=>', d)
-        Popen(['cp', '-al', f, d]).wait()
-
-
-def tarball(files, d):
-    print("Tarring files into {}...".format(d))
-    Popen(['tar', 'czf', d] + files).wait()
 
 
 def main(args):
