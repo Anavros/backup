@@ -31,6 +31,6 @@ def sync(files, d):
 
 def ball(files, d, bconfig):
     name = "{now.year}_{now.month}_{now.day}_{name}.tar.gz".format(
-        now=datetime.now(), name=os.path.basename(bconfig))
+        now=datetime.now(), name=os.path.basename(bconfig).split('.')[0])
     path = os.path.join(d, name)
-    Popen(['tar', 'czf', archive_path] + files).wait()
+    Popen(['tar', 'czf', path] + files).wait()

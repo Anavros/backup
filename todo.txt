@@ -4,4 +4,3 @@
 - Better functions for backing up huge directories like photos.
     - Pick and choose which ones to sync?
 - Caching of file lists?
-- Less subprocess spawning.

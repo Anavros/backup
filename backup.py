@@ -1,72 +1,44 @@
 
-"""
-Entry point for a collection of related backup utilities.
-"""
-
-import os
-from subprocess import Popen
-
 import load
-import util
-from constants import HOME
+import tasks
+
+# To use this script, create a file called `config.py` in this directory,
+# and define the variables `d_links`, `d_syncs`, `d_balls`, and `bconfig`.
+
+# TODO: More details.
 
 
-def main(args):
-    files = load.filelist(args.file)
-
-    # Safe functions.
-    if args.task == 'list':
-        for f in files:
-            print(f)
-            #print("-> ", dest(f, d))
-
-    elif args.task == 'size':
-        total = 0  # bytes
-        pairs = []
-        for f in files:
-            s = os.path.getsize(f)
-            pairs.append((s, f))
-            total += s
-        for s, f in sorted(pairs, key=lambda x: x[0]):
-            print(s, f)
-        print("Total:", total, "Bytes")
-
-    elif args.task == 'covered':
-        if not args.dest:
-            print("No file given to check.")
-        d = os.path.abspath(args.dest)
-        if d in files:
-            print(d, "is covered by", args.file)
-        else:
-            print(d, "is NOT covered by", args.file)
-
-    # Dangerous functions.
-    elif args.task in ['sync', 'link', 'ball']:
-        if not args.safety_off:
-            print("Safety on! Call again with --safety-off.")
-            return
-        if not args.dest:
-            print("Missing destination folder.")
-        d = os.path.abspath(args.dest)
-
-        if args.task == 'sync':
-            piecewise(files, d)
-
-        elif args.task == 'link':
-            link(files, d)
-
-        elif args.task == 'ball':
-            tarball(files, args.dest)
-
+def main(argv, config):
+    files = load.filelist(config.bconfig)
+    if len(argv) > 1:
+        for command in argv[1:]:
+            if   command == 'list':
+                tasks.list(files)
+            elif command == 'size':
+                tasks.size(files)
+            elif command == 'link':
+                tasks.link(files, config.d_links)
+            elif command == 'sync':
+                tasks.sync(files, config.d_syncs)
+            elif command == 'ball':
+                tasks.ball(files, config.d_balls, config.bconfig)
+            else:
+                print("Unknown command:", command)
     else:
-        print("Unknown task:", args.task)
+        # Default behavior without arguments: backup everything.
+        tasks.link(files, config.d_links)
+        tasks.sync(files, config.d_syncs)
+        tasks.ball(files, config.d_balls, config.bconfig)
 
 
 if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("task")
-    parser.add_argument("file")
-    parser.add_argument("-d", "--dest")
-    parser.add_argument("--safety-off", action='store_true')
-    main(parser.parse_args())
+    import sys
+    try:
+        import config
+    except ImportError:
+        print("Create a file `config.py` in the same directory as this script.")
+        print("Define the variables `d_links`, `d_syncs`, `d_balls`, and `bconfig`.")
+        print("These are root-anchored paths for links, syncs (copies), and tarballs.")
+        print("`bconfig` is the path to the backup configuration file.")
+    else:
+        main(sys.argv, config)
