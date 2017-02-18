@@ -6,7 +6,7 @@ Functions to read backup config files.
 import os
 import pathspec
 
-from constants import HOME
+HOME = os.path.expanduser('~/')
 
 
 def filelist(path):

@@ -1,24 +1,36 @@
 
-import util
+import os
+from datetime import datetime
 from subprocess import Popen
 
 
-def link(files, destroot):
+def list(files):
     for f in files:
-        d = util.dest(f, destroot)
-        util.ensure_mkdir(d)
-        print(f, '<=>', d)
-        Popen(['cp', '-al', f, d]).wait()
+        print(f)
 
 
-def sync(files, destroot):
+def size(files):
+    total = 0  # bytes
+    pairs = []
     for f in files:
-        d = util.dest(f, destroot)
-        util.ensure_mkdir(d)
-        print(f, '->', d)
-        Popen(['rsync', '-am', '--delete', f, d]).wait()
+        s = os.path.getsize(f)
+        pairs.append((s, f))
+        total += s
+    for s, f in sorted(pairs, key=lambda x: x[0]):
+        print(s, f)
+    print("Total:", total, "Bytes")
 
 
-def tarball(files, d):
-    print("Tarring files into {}...".format(d))
-    Popen(['tar', 'czf', d] + files).wait()
+def link(files, d):
+    Popen(['cp', '-al', '--parents'] + files + [d]).wait()
+
+
+def sync(files, d):
+    Popen(['rsync', '-Ram', '--delete'] + files + [d]).wait()
+
+
+def ball(files, d, bconfig):
+    name = "{now.year}_{now.month}_{now.day}_{name}.tar.gz".format(
+        now=datetime.now(), name=os.path.basename(bconfig))
+    path = os.path.join(d, name)
+    Popen(['tar', 'czf', archive_path] + files).wait()
