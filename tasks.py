@@ -23,7 +23,8 @@ def size(files):
 
 def link(files, d):
     print("Linking files to {}...".format(d))
-    Popen(['cp', '-al', '--parents'] + files + [d]).wait()
+    with open('/dev/null', 'w') as null:
+        Popen(['cp', '-al', '--parents'] + files + [d], stderr=null).wait()
 
 
 def sync(files, d):
