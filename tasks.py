@@ -22,15 +22,20 @@ def size(files):
 
 
 def link(files, d):
+    print("Linking files to {}...".format(d))
     Popen(['cp', '-al', '--parents'] + files + [d]).wait()
 
 
 def sync(files, d):
+    print("Syncing files to {}...".format(d))
     Popen(['rsync', '-Ram', '--delete'] + files + [d]).wait()
 
 
+# TODO: Allow more than one per day.
 def ball(files, d, bconfig):
     name = "{now.year}_{now.month}_{now.day}_{name}.tar.gz".format(
         now=datetime.now(), name=os.path.basename(bconfig).split('.')[0])
     path = os.path.join(d, name)
-    Popen(['tar', 'czf', path] + files).wait()
+    print("Creating archive {}...".format(path))
+    with open('/dev/null', 'w') as null:
+        Popen(['tar', 'czf', path] + files, stderr=null).wait()

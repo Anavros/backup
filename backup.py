@@ -9,6 +9,7 @@ import tasks
 
 
 def main(argv, config):
+    print("Loading files in {}...".format(config.bconfig))
     files = load.filelist(config.bconfig)
     if len(argv) > 1:
         for command in argv[1:]:
@@ -29,6 +30,7 @@ def main(argv, config):
         tasks.link(files, config.d_links)
         tasks.sync(files, config.d_syncs)
         tasks.ball(files, config.d_balls, config.bconfig)
+    print("All tasks complete.")
 
 
 if __name__ == '__main__':
