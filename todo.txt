@@ -1,6 +1,8 @@
 
+- BUG: Argument list becomes too long around ~14,000 files.
 - Task to clean out old links.
     - Remove link directory and relink from source.
-- Better functions for backing up huge directories like photos.
-    - Pick and choose which ones to sync?
-- Caching of file lists?
+- Solution for keeping big files synced.
+    - Like music and photos.
+    - rdiff-backup?
+    - git-annex?

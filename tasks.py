@@ -18,7 +18,8 @@ def size(files):
         total += s
     for s, f in sorted(pairs, key=lambda x: x[0]):
         print(s, f)
-    print("Total:", total, "Bytes")
+    print("{:,} Files".format(len(pairs)))
+    print("Total: {:,} Bytes".format(total))
 
 
 def link(files, d):
