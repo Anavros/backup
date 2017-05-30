@@ -1,46 +1,46 @@
 
 import load
 import tasks
-
-# To use this script, create a file called `config.py` in this directory,
-# and define the variables `d_links`, `d_syncs`, `d_balls`, and `bconfig`.
-
-# TODO: More details.
+from configparser import ConfigParser
 
 
-def main(argv, config):
-    print("Loading files in {}...".format(config.bconfig))
-    files = load.filelist(config.bconfig)
-    if len(argv) > 1:
-        for command in argv[1:]:
-            if   command == 'list':
+def main(args):
+    conf = ConfigParser()
+    conf.read('config.ini')
+    try:
+        s = conf[args.section]
+    except KeyError:
+        print("Unknown section: '{}'. Check your config.ini file.".format(args.section))
+        exit(1)
+
+    print("Loading files in {}...".format(s['backupconfig']))
+    files = load.filelist(s['backupconfig'])
+
+    if args.tasks:
+        for task in args.tasks:
+            if   task == 'list':
                 tasks.list(files)
-            elif command == 'size':
+            elif task == 'size':
                 tasks.size(files)
-            elif command == 'link':
-                tasks.link(files, config.d_links)
-            elif command == 'sync':
-                tasks.sync(files, config.d_syncs)
-            elif command == 'ball':
-                tasks.ball(files, config.d_balls, config.bconfig)
+            elif task == 'link':
+                tasks.link(files, s['links'])
+            elif task == 'sync':
+                tasks.sync(files, s['syncs'])
+            elif task == 'ball':
+                tasks.ball(files, s['balls'], s['backupconfig'])
             else:
                 print("Unknown command:", command)
     else:
         # Default behavior without arguments: backup everything.
-        tasks.link(files, config.d_links)
-        tasks.sync(files, config.d_syncs)
-        tasks.ball(files, config.d_balls, config.bconfig)
+        tasks.link(files, s['links'])
+        tasks.sync(files, s['syncs'])
+        tasks.ball(files, s['balls'], s['backupconfig'])
     print("All tasks complete.")
 
 
 if __name__ == '__main__':
-    import sys
-    try:
-        import config
-    except ImportError:
-        print("Create a file `config.py` in the same directory as this script.")
-        print("Define the variables `d_links`, `d_syncs`, `d_balls`, and `bconfig`.")
-        print("These are root-anchored paths for links, syncs (copies), and tarballs.")
-        print("`bconfig` is the path to the backup configuration file.")
-    else:
-        main(sys.argv, config)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("section")
+    parser.add_argument("tasks", nargs='*')
+    main(parser.parse_args())
